@@ -10,20 +10,20 @@ drop_tube_angle = 180 # enter the value in degrees for the drop tube. clockwise 
 # Configuration for the colors for the bins and the lines leading to those bins.
 # Note: The line leading up to the bin will be the same color as the bin 
 
-bin1_offset = 0.3 # offset in meters
+bin1_offset = 0.25 # offset in meters
 bin1_color = [1,0,0] # e.g. [1,0,0] for red
 bin1_metallic = False
 
-bin2_offset = 0.3
-bin2_color = [0,1,0] # green
+bin2_offset = 0.25
+bin2_color = [0,1,0]
 bin2_metallic = False
 
-bin3_offset = 0.3
-bin3_color = [0,0,1] # blue
+bin3_offset = 0.25
+bin3_color = [0,0,1]
 bin3_metallic = False
 
-bin4_offset = 0.3
-bin4_color = [1,1,1] # white; changed from [0,0,0] to [1,1,1] to avoid confusing with no color
+bin4_offset = 0.25
+bin4_color = [1,1,1]
 bin4_metallic = False
 #--------------------------------------------------------------------------------
 import sys
@@ -52,34 +52,34 @@ else:
 import random 
 
 def dispense_container():
-    num = random.randint(1, 6) #Produces a random number ranging from 1-6
-    properties = table.dispense_container(num, True) #Calls said number and assigns the properties of the new container to a variable
+    num = random.randint(4, 4)                                  #Produces a random number ranging from 1-6, these numbers corrospond to one of the six bottle
+    properties = table.dispense_container(num, True)            #Calls said number and assigns the properties of the new bottle to a variable
     print(properties)
-    return properties
+    return properties                                           #Returns properties
 
-def load_container(properties,table_vacancy): #Will load up to three containers onto the q-bot, will stop when certain conditions are met.
-    bin_check = ''              #Initializing needed values for the function
+def load_container(properties,table_vacancy):                   #Will load up to three containers onto the q-bot, will stop when certain conditions are met.
+    bin_check = ''                                              #Initializing needed values for the function
     bottle_number = 0
     mass = 0
     bin = True
 
-    while (bin == True and mass < 90 and bottle_number < 3): #Checks both total mass, and bottle count to determine if another bottle should be loaded
-        if table_vacancy == True:
-            properties = dispense_container() #Creates a new variable in this function with the properties returned from the dispense container function
-            if bottle_number == 0: #Checks that there is no previous bottle on table
+    while (bin == True and bottle_number < 3):                  #Checks bottle count to determine if another bottle should be loaded
+        if table_vacancy == True:                               #This if statement checks if there is a bottle already on the table so another is not dropped ontop of it
+            properties = dispense_container()                   #Creates a new variable in this function with the properties returned from the dispense container function
+            if bottle_number == 0:                              #Checks that there is no previous bottle on table
                 old_properties = properties
-            new_bin = properties[2] #Assigns the bin number to a variable that the program can reference in the future.
+            new_bin = properties[2]                             #Assigns the bin number to a variable that the program can reference in the future.
         else:
-            old_properties = properties
-            new_bin = properties[2]
-            table_vacancy = True
+            old_properties = properties                         #
+            new_bin = properties[2]                             #
+            table_vacancy = True                                #
 
-        if old_properties[2] == new_bin: #Checks if the newest binID and the first binID are the same
-            mass += properties[1]#Adds mass
-            if mass >= 90:
+        if old_properties[2] == new_bin:                        #Checks if the newest binID and the first binID are the same
+            mass += properties[1]                               #Adds mass
+            if mass >= 90:                                      #Checks total mass, if total mass is above 90 grams, will not load the next bottle
                 bin = False
-            else:
-                arm.move_arm(0.678, 0.0, 0.29) #Then moves arm accordingly to place bottle
+            else:                                               #Mass is less, and we have already checked bottle count so
+                arm.move_arm(0.678, 0.0, 0.29)                  #Moves arm accordingly to place bottle
                 time.sleep(2)
                 arm.control_gripper(33)
                 time.sleep(2)
@@ -90,7 +90,7 @@ def load_container(properties,table_vacancy): #Will load up to three containers 
                 arm.move_arm(0.278, -0.278, 0.686)
                 arm.move_arm(0.0, -0.393, 0.686)
                 
-                if bottle_number == 0: #Each seperate if statement below (this one and the two beneath) simply fine tune the location of each bottle when being placed
+                if bottle_number == 0:                          #Each seperate if statement below (this one and the two beneath) simply fine tune the location of each bottle when being placed
                     bot.rotate(203)
                     time.sleep(2)
                     arm.move_arm(-0.02, -0.546, 0.537)
@@ -109,14 +109,14 @@ def load_container(properties,table_vacancy): #Will load up to three containers 
 
         else:
             bin = False
-        print(mass)
-        bottle_number += 1 #Adds one to total number of bins to avoid going over limit
+        print(mass)                                             #Prints mass so the user can keep track of total
+        bottle_number += 1                                      #Adds one to total number of bins to avoid going over limit
     print(bin_check)
-    table_vacancy = False
-    print("transfered" , properties)
-    return properties,old_properties, table_vacancy
+    table_vacancy = False                                       #
+    print("transfered" , properties)                            #
+    return properties,old_properties, table_vacancy             #
 
-def arm_deposit(): #Repetitive code needed to drop the containers off in there location, thus made into seperate function.
+def arm_deposit():                                              #Repetitive code needed to drop the containers off in there location, thus made into seperate function.
     time.sleep(2)
     arm.control_gripper(-26)
     time.sleep(2)
@@ -126,15 +126,11 @@ def arm_deposit(): #Repetitive code needed to drop the containers off in there l
     arm.control_gripper(-7)
     time.sleep(1.5)
     arm.home()
-    
 
-            
-
-def deposit_container():
+def deposit_container():                
     bot.activate_ultrasonic_sensor()
-    x = bot.read_ultrasonic_sensor()-0.05
-    y = 0
-    bot.forward_distance(x)
+    move_distance = bot.read_ultrasonic_sensor() - 0.05                       #Detect distance between bin and bot when depositing bottle
+    bot.forward_distance(move_distance)
     time.sleep(1)
     bot.rotate(-100)
     time.sleep(2)
