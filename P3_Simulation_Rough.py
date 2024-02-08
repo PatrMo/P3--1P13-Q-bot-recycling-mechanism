@@ -51,8 +51,12 @@ else:
 
 import random 
 
+#The first function we need is the dispense container function, which will, as its name suggests, allow our program to dispense one of six different bottles every time it is called
+#These bottles will land on the servo table and then be picked up in the load container function. The load container function is the function that will call this function, it is
+#not called in the main function
+
 def dispense_container():
-    num = random.randint(4, 4)                                  #Produces a random number ranging from 1-6, these numbers corrospond to one of the six bottle
+    num = random.randint(1, 6)                                  #Produces a random number ranging from 1-6, these numbers corrospond to one of the six bottle
     properties = table.dispense_container(num, True)            #Calls said number and assigns the properties of the new bottle to a variable
     print(properties)
     return properties                                           #Returns properties
@@ -129,8 +133,8 @@ def arm_deposit():                                              #Repetitive code
 
 def deposit_container():                
     bot.activate_ultrasonic_sensor()
-    move_distance = bot.read_ultrasonic_sensor() - 0.05                       #Detect distance between bin and bot when depositing bottle
-    bot.forward_distance(move_distance)
+    move_distance = bot.read_ultrasonic_sensor() - 0.05         #Detect distance between bin and bot when depositing bottle
+    bot.forward_distance(move_distance)                         #The following are commands to bring the bot from the line to the bin, deposit the bottle, and then
     time.sleep(1)
     bot.rotate(-100)
     time.sleep(2)
