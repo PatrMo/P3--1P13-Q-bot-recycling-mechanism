@@ -190,9 +190,7 @@ def transfer_container(properties):                                             
     line_check = bot.line_following_sensors()                    #Variable to store line sensor values
     
     while line_check != [0,0]:                                   #Line following and bin finiding algorithm
-        color_check_optimiser = 0                                #Variable to check colour in intervals to reduce latency and prevent runtime issues
-        while color_check_optimiser < 10:                        #Loop for bot to follow track
-        color_check_optimiser = 0                                                    #variable to check colour in intervals to reduce latency and prevent runtime issues
+        color_check_optimiser = 0                                #Variable to check colour in intervals to reduce latency and prevent runtime issuess
         while color_check_optimiser < 10:                                            #loop for bot to follow track
             time.sleep(0.1)
             color_check_optimiser += 1
