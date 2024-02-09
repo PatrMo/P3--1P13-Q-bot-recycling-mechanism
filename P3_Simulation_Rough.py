@@ -19,11 +19,11 @@ bin2_color = [0,1,0]
 bin2_metallic = False
 
 bin3_offset = 0.25
-bin3_color = [0,0,1]
+bin3_color = [0,0,1]        
 bin3_metallic = False
 
 bin4_offset = 0.25
-bin4_color = [1,1,1]
+bin4_color = [1,1,1]        # white; changed from [0,0,0] to [1,1,1] to avoid confusing with no color
 bin4_metallic = False
 #--------------------------------------------------------------------------------
 import sys
@@ -55,7 +55,7 @@ import random
 #These bottles will land on the servo table and then be picked up in the load container function. The load container function is the function that will call this function, it is
 #not called in the main function.
 
-def dispense_container():
+def dispense_container():                                       #Function to dispense new containers
     num = random.randint(1, 6)                                  #Produces a random number ranging from 1-6, these numbers corrospond to one of the six bottle
     properties = table.dispense_container(num, True)            #Calls said number and assigns the properties of the new bottle to a variable
     print(properties)
@@ -74,9 +74,9 @@ def load_container(properties, table_vacancy):                  #Will load up to
                 old_properties = properties
             new_bin = properties[2]                             #Assigns the bin number to a variable that the program can reference in the future.
         else:
-            old_properties = properties                         #
-            new_bin = properties[2]                             #
-            table_vacancy = True                                #
+            old_properties = properties                         #Properties of previous bin
+            new_bin = properties[2]                             #Variable new_bin to check against old bottles bint type
+            table_vacancy = True                                #Shows that table is vacant
 
         if old_properties[2] == new_bin:                        #Checks if the newest binID and the first binID are the same
             mass += properties[1]                               #Adds mass
@@ -116,9 +116,9 @@ def load_container(properties, table_vacancy):                  #Will load up to
         print(mass)                                             #Prints mass so the user can keep track of total
         bottle_number += 1                                      #Adds one to total number of bins to avoid going over limit
     print(bin_check)
-    table_vacancy = False                                       #
-    print("transfered" , properties)                            #
-    return properties,old_properties, table_vacancy             #
+    table_vacancy = False                                       #Sets table to no longer be vacant for next cycle
+    print("transfered" , properties)                            
+    return properties,old_properties, table_vacancy             #Returns table vacancy status and previous bottle properties
 
 def arm_deposit():                                              #Repetitive code needed to drop the containers off in there location, thus made into seperate function.
     time.sleep(2)
@@ -131,12 +131,12 @@ def arm_deposit():                                              #Repetitive code
     time.sleep(1.5)
     arm.home()
 
-def deposit_container():                
+def deposit_container():                                        #This function is used to bring the bot from the line to the bin, rotate the bot so that the containers can be deposited and deposit the bottle
     bot.activate_ultrasonic_sensor()
-    move_distance = bot.read_ultrasonic_sensor() - 0.05         #Detect distance between bin and bot when depositing bottle
-    bot.forward_distance(move_distance)                         #The following are commands to bring the bot from the line to the bin, deposit the bottle, and then
+    move_distance = bot.read_ultrasonic_sensor() - 0.05         #Detect distance between bin and bot using ultrasonic sensor when depositing bottle and set a movement value to avoid bumping into bin
+    bot.forward_distance(move_distance)                         
     time.sleep(1)
-    bot.rotate(-100)
+    bot.rotate(-100)                                           
     time.sleep(2)
     bot.activate_linear_actuator()
     bot.rotate_hopper(40)
@@ -145,38 +145,34 @@ def deposit_container():
     bot.deactivate_ultrasonic_sensor()
     
 
-def return_home():
+def return_home():                                                                    #function to return arm back to starting position and Q-bot from bin
     arm.home()
     bot.activate_line_following_sensor()
     time.sleep(1)
     bot.rotate(-90)
     line_check = bot.line_following_sensors()
-    #return to line algorithm
-    while line_check == [0,0]:
+    while line_check == [0,0]:                                                        #return to line algorithm
         bot.set_wheel_speed([0.1,0.1])
         line_check = bot.line_following_sensors()
-    #set q-bot straight
-    bot.set_wheel_speed([0,0])
+    bot.set_wheel_speed([0,0])                                                        #set q-bot straight along line
     time.sleep(1)
     bot.rotate(90)
     time.sleep(1)
-    line_check = bot.line_following_sensors()
-    x,y,z = bot.position()
+    line_check = bot.line_following_sensors()     
+    x,y,z = bot.position()                                                           #initializes x,y,z coordinate values
     print(x,y,z)
     bot.set_wheel_speed([0.1,0.1])
-    #Set range for area to return to x,y,z
-    while not ((1.52 > x and x > 1.46) and (-0.01 < y and y < 0.01)) :
+    while not ((1.52 > x and x > 1.46) and (-0.01 < y and y < 0.01)) :               #line following algorithm that checks if bot is within set range of original x,y,z values
         line_follow(line_check)
         line_check = bot.line_following_sensors()
-        #Setting values to  if bot still not in range yet
-        x,y,z = bot.position()
+        x,y,z = bot.position()                                                       #Setting values to check if bot still not in range yet
         print(x,y,z)
         
     bot.set_wheel_speed([0,0])
     bot.deactivate_line_following_sensor()
     bot.deactivate_ultrasonic_sensor()
 
-def line_follow(line_check):                                    #line following decision statements
+def line_follow(line_check):                                                         #function for line following decision statements used in multiple other functions
     if line_check == [1,1]:
         bot.set_wheel_speed([0.1,0.1])
     elif line_check == [1,0]:
@@ -184,43 +180,47 @@ def line_follow(line_check):                                    #line following 
     elif line_check == [0,1]:
         bot.set_wheel_speed([0.1,0.06])
 
-def transfer_container(properties):
-    transfered_properties = properties[2]                        #
+def transfer_container(properties):                                                 #function for transfering container from home position to appropriate bin
+    transfered_properties = properties[2]
     print(transfered_properties)
     bins = ['Bin01','Bin02','Bin03','Bin04']                     #Initalizes the bins as a list that can be referenced later
     colors = [[1,0,0],[0,1,0],[0,0,1],[1,1,1]]                   #Initalizes the colours of the bins as a list (within a list) that can be refereneced later
     bot.activate_line_following_sensor()                         #Activates the line following sensor
     bot.activate_color_sensor()                                  #Activates the colour sensor
     line_check = bot.line_following_sensors()                    #Variable to store line sensor values
+    
     while line_check != [0,0]:                                   #Line following and bin finiding algorithm
         color_check_optimiser = 0                                #Variable to check colour in intervals to reduce latency and prevent runtime issues
         while color_check_optimiser < 10:                        #Loop for bot to follow track
+        color_check_optimiser = 0                                                    #variable to check colour in intervals to reduce latency and prevent runtime issues
+        while color_check_optimiser < 10:                                            #loop for bot to follow track
             time.sleep(0.1)
             color_check_optimiser += 1
-            line_follow(line_check)                              #Calls line following function
+            line_follow(line_check)                                                  #calls line following function
             line_check = bot.line_following_sensors()
-        
-        bin_color = bot.read_color_sensor()[0]                   #Bin checking loop, stops at correct bin
-        for i in range(4):                                       #Loop to check lists with each colour and bin type that get cycled through
+            
+        bin_color = bot.read_color_sensor()[0]                                       #bin checking loop, stops at correct bin
+        for i in range(4):                                                           #loop to check lists with each colour and bin type that get cycled through
             if bin_color == colors[i] and transfered_properties == bins[i]:
                 line_check = [0,0]
                 time.sleep(1.5)
                 bot.set_wheel_speed([0,0])
                 time.sleep(2)
                 bot.rotate(90)
+
         
     bot.deactivate_color_sensor()
     bot.set_wheel_speed([0,0])
     bot.deactivate_line_following_sensor()
 
     
-def main():
+def main():                                                                           #function that runs all of the other functions
     loop = True
-    table_vacancy = True
-    properties = ['','','']
+    table_vacancy = True                                                              #table is vacant for first iteration
+    properties = ['','','']                                                           #empty properties list
     while loop == True:
-        x,y,z = load_container(properties,table_vacancy)
-        properties, old_properties, table_vacancy = x,y,z
+        x,y,z = load_container(properties,table_vacancy)                              #set arbitrary variables to represent the oldand new properties as well as table vacancy
+        properties, old_properties, table_vacancy = x,y,z                             #work around because varibales could not be initialized in previous line
         transfer_container(old_properties)
         deposit_container()
         return_home()
@@ -236,4 +236,3 @@ def main():
 #---------------------------------------------------------------------------------
 # STUDENT CODE ENDS
 #---------------------------------------------------------------------------------
-
