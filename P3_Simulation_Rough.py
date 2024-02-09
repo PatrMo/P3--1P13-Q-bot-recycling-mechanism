@@ -53,7 +53,7 @@ import random
 
 #The first function we need is the dispense container function, which will, as its name suggests, allow our program to dispense one of six different bottles every time it is called
 #These bottles will land on the servo table and then be picked up in the load container function. The load container function is the function that will call this function, it is
-#not called in the main function
+#not called in the main function.
 
 def dispense_container():
     num = random.randint(1, 6)                                  #Produces a random number ranging from 1-6, these numbers corrospond to one of the six bottle
@@ -61,7 +61,7 @@ def dispense_container():
     print(properties)
     return properties                                           #Returns properties
 
-def load_container(properties,table_vacancy):                   #Will load up to three containers onto the q-bot, will stop when certain conditions are met.
+def load_container(properties, table_vacancy):                  #Will load up to three containers onto the q-bot, will stop when certain conditions are met.
     bin_check = ''                                              #Initializing needed values for the function
     bottle_number = 0
     mass = 0
@@ -150,11 +150,11 @@ def return_home():
     bot.activate_line_following_sensor()
     time.sleep(1)
     bot.rotate(-90)
-    check2 = bot.line_following_sensors()
+    line_check = bot.line_following_sensors()
     #return to line algorithm
-    while check2 == [0,0]:
+    while line_check == [0,0]:
         bot.set_wheel_speed([0.1,0.1])
-        check2 = bot.line_following_sensors()
+        line_check = bot.line_following_sensors()
     #set q-bot straight
     bot.set_wheel_speed([0,0])
     time.sleep(1)
@@ -164,11 +164,11 @@ def return_home():
     x,y,z = bot.position()
     print(x,y,z)
     bot.set_wheel_speed([0.1,0.1])
-    # set range for area to return to x,y,z
+    #Set range for area to return to x,y,z
     while not ((1.52 > x and x > 1.46) and (-0.01 < y and y < 0.01)) :
         line_follow(line_check)
         line_check = bot.line_following_sensors()
-        #setting values to check if bot still not in range yet
+        #Setting values to  if bot still not in range yet
         x,y,z = bot.position()
         print(x,y,z)
         
@@ -176,7 +176,7 @@ def return_home():
     bot.deactivate_line_following_sensor()
     bot.deactivate_ultrasonic_sensor()
 
-def line_follow(line_check):                        #line following decision statements
+def line_follow(line_check):                                    #line following decision statements
     if line_check == [1,1]:
         bot.set_wheel_speed([0.1,0.1])
     elif line_check == [1,0]:
@@ -185,36 +185,29 @@ def line_follow(line_check):                        #line following decision sta
         bot.set_wheel_speed([0.1,0.06])
 
 def transfer_container(properties):
-    transfered_properties = properties[2]
+    transfered_properties = properties[2]                        #
     print(transfered_properties)
-    bins = ['Bin01','Bin02','Bin03','Bin04']
-    colors = [[1,0,0],[0,1,0],[0,0,1],[1,1,1]]
-    bot.activate_line_following_sensor()
-    bot.activate_color_sensor()
-    # variable to store line sensor values
-    line_check = bot.line_following_sensors()
-    # line following and bin finiding algorithm
-    while line_check != [0,0]:
-        # variable to check colour in intervals to reduce latency and prevent runtime issues
-        color_check_optimiser = 0
-        # loop for bot to follow track
-        while color_check_optimiser < 10:
+    bins = ['Bin01','Bin02','Bin03','Bin04']                     #Initalizes the bins as a list that can be referenced later
+    colors = [[1,0,0],[0,1,0],[0,0,1],[1,1,1]]                   #Initalizes the colours of the bins as a list (within a list) that can be refereneced later
+    bot.activate_line_following_sensor()                         #Activates the line following sensor
+    bot.activate_color_sensor()                                  #Activates the colour sensor
+    line_check = bot.line_following_sensors()                    #Variable to store line sensor values
+    while line_check != [0,0]:                                   #Line following and bin finiding algorithm
+        color_check_optimiser = 0                                #Variable to check colour in intervals to reduce latency and prevent runtime issues
+        while color_check_optimiser < 10:                        #Loop for bot to follow track
             time.sleep(0.1)
             color_check_optimiser += 1
-            line_follow(line_check)                     #calls line following function
+            line_follow(line_check)                              #Calls line following function
             line_check = bot.line_following_sensors()
-            
-        # bin checking loop, stops at correct bin
-        bin_color = bot.read_color_sensor()[0]
-        #loop to check lists with each colour and bin type that get cycled through
-        for i in range(4):
+        
+        bin_color = bot.read_color_sensor()[0]                   #Bin checking loop, stops at correct bin
+        for i in range(4):                                       #Loop to check lists with each colour and bin type that get cycled through
             if bin_color == colors[i] and transfered_properties == bins[i]:
                 line_check = [0,0]
                 time.sleep(1.5)
                 bot.set_wheel_speed([0,0])
                 time.sleep(2)
                 bot.rotate(90)
-
         
     bot.deactivate_color_sensor()
     bot.set_wheel_speed([0,0])
